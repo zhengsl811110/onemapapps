@@ -32,5 +32,47 @@
             android:layout_marginTop="5dp"
             android:background="@drawable/icon_location" />
     </LinearLayout>
-    <include layout="@layout/map_tools_right" />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="@+id/mapView"
+        app:layout_constraintRight_toRightOf="@+id/mapView"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:layout_marginRight="@dimen/fab_margin">
+        <CheckBox
+            android:id="@+id/layer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/icon_layer"
+            android:button="@null"/>
+        <CheckBox
+            android:id="@+id/measureArea"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/icon_area"
+            android:layout_marginTop="5dp"
+            android:button="@null"/>
+        <CheckBox
+            android:id="@+id/measureLength"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/icon_length"
+            android:layout_marginTop="5dp"
+            android:button="@null"/>
+        <CheckBox
+            android:id="@+id/iQuery"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/icon_i"
+            android:layout_marginTop="5dp"
+            android:button="@null"/>
+        <CheckBox
+            android:id="@+id/trash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/icon_trash"
+            android:layout_marginTop="5dp"
+            android:button="@null"/>
+    </LinearLayout>
 </android.support.constraint.ConstraintLayout>

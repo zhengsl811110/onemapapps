@@ -1,7 +1,10 @@
 package com.example.zhengsl.onemapapp.activity
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
@@ -16,11 +19,16 @@ import com.example.zhengsl.onemapapp.R
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 import kotlinx.android.synthetic.main.content_main.*
+import pub.devrel.easypermissions.EasyPermissions
+import pub.devrel.easypermissions.AppSettingsDialog
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
-    var map:ArcGISMap?=null
-    var locationDisplay:LocationDisplay?=null
+
+class MainActivity : AppCompatActivity(),EasyPermissions.PermissionCallbacks,NavigationView.OnNavigationItemSelectedListener {
+
+    var map: ArcGISMap? = null
+    var locationDisplay: LocationDisplay? = null
+    var permissions=Manifest.permission.ACCESS_FINE_LOCATION
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -36,11 +44,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             setViewPointCenter()
         }
         gpsLocation.setOnClickListener {
-            locationDisplay?.autoPanMode = LocationDisplay.AutoPanMode.RECENTER
-            locationDisplay?.startAsync()
+            gpsLocation()
         }
         init()
     }
+
 
     override fun onBackPressed() {
         if (drawer_layout.isDrawerOpen(GravityCompat.START)) {
@@ -66,6 +74,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         var layer = ArcGISTiledLayer("http://58.210.9.131/arcgis/rest/services/CS/GXQMAP/MapServer")
         val baseMap = Basemap(layer)
         map = ArcGISMap(baseMap)
+        mapView.isAttributionTextVisible = false
         mapView.map = map
         map?.addDoneLoadingListener {
             setViewPointCenter()
@@ -81,6 +90,48 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         mapView.setViewpointCenterAsync(center, scale)
     }
 
+    private fun gpsLocation() {
+        if (checkPermission()) {
+            locationDisplay?.autoPanMode = LocationDisplay.AutoPanMode.RECENTER
+            locationDisplay?.startAsync()
+        } else {
+            EasyPermissions.requestPermissions(this, "当前功能需要GPS权限", 100, permissions)
+        }
+    }
+
+    private fun checkPermission():Boolean {
+        var isChecked = false
+        if (Build.VERSION.SDK_INT >= 23) {
+            isChecked = EasyPermissions.hasPermissions(this, permissions)
+        }
+        return isChecked
+    }
+
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+    }
+
+
+
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
+        gpsLocation()
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            AppSettingsDialog.Builder(this).build().show()
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
+            //拒绝授权后，从系统设置了授权后，返回APP进行相应的操作
+            gpsLocation();
+        }
+    }
 
     override fun onPause() {
         super.onPause()
